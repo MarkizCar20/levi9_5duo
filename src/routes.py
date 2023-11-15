@@ -20,15 +20,22 @@ with open('L9HomeworkChallengePlayersInput.csv', newline='') as f:
 for player_stats in players_stats_dict.values():
     player_stats.calculate_averages()
 
+for player_stats in players_stats_dict.values():
+    player_stats.calculate_advanced()
+
 for player_name, player_stats in players_stats_dict.items():
     print(f"Player: {player_name}")
     print(f"Position: {player_stats.position}")
     print(f"Average FTM: {player_stats.ftm}")
     print(f"Average FTA: {player_stats.fta}")
+    print(f"FT Percent:{player_stats.ft_percent}%")
     print(f"Average Two-Pointers Made: {player_stats.twopm}")
     print(f"Average Two-Pointers Attempted: {player_stats.twopa}")
+    print(f"Two-Pointer Percent:{player_stats.twp_percent}%")
     print(f"Average Three-Pointers Made: {player_stats.threepm}")
     print(f"Average Three-Pointers Attempted: {player_stats.threepa}")
+    print(f"Three-Point Percent:{player_stats.threep_percent}%")
+    print(f"Average points:{player_stats.points}")
     print(f"Average Rebounds: {player_stats.reb}")
     print(f"Average Blocks: {player_stats.blk}")
     print(f"Average Assists: {player_stats.ast}")
@@ -36,6 +43,12 @@ for player_name, player_stats in players_stats_dict.items():
     print(f"Average Turnovers: {player_stats.tov}")
     print("-" * 20)
 
+for player_name, player_stats in players_stats_dict.items():
+    print(f"Advanced statistics for player: {player_name}")
+    print(f"Player VAL: {player_stats.valor_index:.2f}")
+    print(f"Player eFG%: {player_stats.eff_fg:.2f}%")
+    print(f"Player TS%: {player_stats.truesht_eff:.2f}%")
+    print(f"Player hAST%: {player_stats.holling_as:.2f}%")
 
 
 app = Flask(__name__)
