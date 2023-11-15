@@ -40,6 +40,7 @@ class PlayerStats:
         self.tov += float(tov)
 
     def calculate_averages(self):
+        if (self.appearances != 0):
             self.ftm = self.ftm / self.appearances
             self.fta = self.fta / self.appearances
             if (self.fta != 0):
