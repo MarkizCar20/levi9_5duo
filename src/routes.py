@@ -1,10 +1,12 @@
-from flask import Flask
+from flask import Flask, jsonify, Response, make_response
 from flask_restful import Resource, Api
 from models.models import PlayerStats
+import json
 import csv
 
 players_stats_dict = {}
 
+#Opening csv file and creating stats for every player
 with open('L9HomeworkChallengePlayersInput.csv', newline='') as f:
     reader = csv.reader(f)
     headers = next(reader)
@@ -23,44 +25,64 @@ for player_stats in players_stats_dict.values():
 for player_stats in players_stats_dict.values():
     player_stats.calculate_advanced()
 
-for player_name, player_stats in players_stats_dict.items():
-    print(f"Player: {player_name}")
-    print(f"Position: {player_stats.position}")
-    print(f"Average FTM: {player_stats.ftm}")
-    print(f"Average FTA: {player_stats.fta}")
-    print(f"FT Percent:{player_stats.ft_percent}%")
-    print(f"Average Two-Pointers Made: {player_stats.twopm}")
-    print(f"Average Two-Pointers Attempted: {player_stats.twopa}")
-    print(f"Two-Pointer Percent:{player_stats.twp_percent}%")
-    print(f"Average Three-Pointers Made: {player_stats.threepm}")
-    print(f"Average Three-Pointers Attempted: {player_stats.threepa}")
-    print(f"Three-Point Percent:{player_stats.threep_percent}%")
-    print(f"Average points:{player_stats.points}")
-    print(f"Average Rebounds: {player_stats.reb}")
-    print(f"Average Blocks: {player_stats.blk}")
-    print(f"Average Assists: {player_stats.ast}")
-    print(f"Average Steals: {player_stats.stl}")
-    print(f"Average Turnovers: {player_stats.tov}")
-    print("-" * 20)
-
-for player_name, player_stats in players_stats_dict.items():
-    print(f"Advanced statistics for player: {player_name}")
-    print(f"Player VAL: {player_stats.valor_index:.2f}")
-    print(f"Player eFG%: {player_stats.eff_fg:.2f}%")
-    print(f"Player TS%: {player_stats.truesht_eff:.2f}%")
-    print(f"Player hAST%: {player_stats.holling_as:.2f}%")
-
-
 app = Flask(__name__)
 api = Api(app)
 
-class HelloWorld(Resource):
-    def get(self):
-        return { 'hello':'world' }
+def get_player_stats(player_name):
+    if player_name in players_stats_dict:
+        player = players_stats_dict[player_name]
+    
+        traditional_stats = {
+            "freeThrows": {
+                "attempts": f"{player.fta:.1f}",
+                "made": f"{player.ftm:.1f}",
+                "shootingPercentage": f"{player.ft_percent:.1f}"
+            },
+            "twoPoints": {
+                "attempts": f"{player.twopa:.1f}",
+                "made": f"{player.twopm:.1f}",
+                "shootingPercentage": f"{player.twp_percent:.1f}"
+            },
+            "threePoints": {
+                "attempts": f"{player.threepa:.1f}",
+                "made": f"{player.threepm:.1f}",
+                "shootingPercentage": f"{player.threep_percent:.1f}"
+            },
+            "points":f"{player.points:.1f}",
+            "rebounds": f"{player.reb:.1f}",
+            "blocks": f"{player.blk:.1f}",
+            "assists": f"{player.ast:.1f}",
+            "steals": f"{player.stl:.1f}",
+            "turnovers": f"{player.tov:.1f}"
+        }
+
+        advanced_stats = {
+            "valorization": f"{player.valor_index:.1f}",
+            "effectiveFieldGoalPercentage": f"{player.eff_fg:.1f}",
+            "trueShootingPercentage": f"{player.truesht_eff:.1f}",
+            "hollingerAssistRatio": f"{player.holling_as:.1f}"
+        }
+        response = {
+            "playerName": player_name,
+            "gamesPlayed": player.appearances,
+            "traditional": traditional_stats,
+            "advanced": advanced_stats
+        }
+
+        response = make_response(json.dumps(response, indent=2), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        error_response = {
+            "error":"Player not found"
+        }
+        response = make_response(json.dumps(error_response), 404)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
 
 class PlayerStatistics(Resource):
     def get(self, player_name):
-        return { 'data' : 'player_one'}
+        return get_player_stats(player_name)
 
-api.add_resource(HelloWorld, '/')
 api.add_resource(PlayerStatistics, '/stats/player/<string:player_name>')
